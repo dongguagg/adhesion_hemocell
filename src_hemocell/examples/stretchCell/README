@@ -1,0 +1,24 @@
+StretchCell
+-----------
+
+The ``stretchCell`` cases used for validation of the material models used in
+HemoCell. A single cell is initialized in a domain with periodicity in all
+directions. The only external force is on the outer points of the opposing sides
+of the cell. In this manner the cell is stretched. This is validated against
+experimental data.
+
+To compile follow the steps in the user guide or run ``compile.sh``
+
+The most important adjustable variable in the ``config.xml`` file:
+
+- ``<parameters><stretchForce>`` This controls the stretching force and is
+  defined in piconewton.
+
+stretchCell must be run with only one processor, so either ``./stretchCell
+config.xml`` or ``mpirun -n 1 ./stretchCell config.xml``. This is because the
+helper that stretches the cell is not made to be used on multiple processors.
+
+Validation
+==========
+
+The validation curves can be represented by running `validation.sh`.

@@ -1,0 +1,4 @@
+breathe
+Sphinx
+sphinxcontrib.bibtex
+sphinxcontrib.inlinesyntaxhighlight

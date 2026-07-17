@@ -1,0 +1,54 @@
+# CMake and compiler artifacts
+/build/
+/cmake-build-*/
+**/build/
+**/cmake-build-*/
+*.o
+*.obj
+*.a
+*.so
+*.so.*
+*.dylib
+*.dll
+*.exe
+
+# HemoCell simulation results
+**/output/
+**/output_[0-9]*/
+**/tmp/
+**/tmp_[0-9]*/
+**/result/
+**/results/
+**/hdf5/
+**/csv/
+**/checkpoint/
+**/log/
+
+# Result and visualization files outside the standard result directories
+*.h5
+*.hdf5
+*.vtk
+*.vti
+*.vtu
+*.xdmf
+*.xmf
+
+# Runtime and scheduler logs
+*.log
+slurm-*.out
+slurm-*.err
+nohup.out
+core
+core.*
+
+# Python caches and local editor files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Executables produced in source directories by the local cases
+/twoCellShear/twoCellShear
