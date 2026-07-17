@@ -147,6 +147,9 @@ class HemoCell {
   //micrometers, energy scales in joules, and alpha in inverse micrometers.
   void setAdhesion(T r0, T rc, T epsilon, T D0, T alpha);
 
+  //Keep all membrane nodes of one cell fixed while retaining their forces.
+  void setCellFixed(plint cellId);
+
   // Lees-Edwards boundary condition
   bool leesEdwardsBC = false;
   double * LEcurrentDisplacement;

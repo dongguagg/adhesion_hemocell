@@ -8,7 +8,7 @@
 #   or running HemoCell.
 #
 # Target:
-#   System GCC/G++ + OpenMPI + system HDF5 + bundled Palabos
+#   System GCC/G++ + /opt OpenMPI 4.0.2 + system HDF5 + bundled Palabos
 #
 # HemoCell:
 #   /home/jxh/adhesion_rbc/src_hemocell
@@ -54,6 +54,10 @@ export PALABOS_DIR=/home/jxh/adhesion_rbc/src_hemocell/palabos
 export PALABOS_ROOT="$PALABOS_DIR"
 export PLB_ROOT="$PALABOS_DIR"
 export PALABOS="$PALABOS_DIR"
+
+export OPENMPI_ROOT=/opt/software/openmpi-4.0.2
+export INTEL_COMPILER_RUNTIME=/opt/intel-2020/compilers_and_libraries_2020.0.163/linux/compiler/lib/intel64_lin
+export INTEL_LIBFABRIC_RUNTIME=/opt/intel-2020/compilers_and_libraries_2020.0.163/linux/mpi/intel64/libfabric/lib
 
 
 # ------------------------------------------------------------
@@ -133,6 +137,27 @@ path_prepend PATH /usr/bin
 path_prepend PATH /sbin
 path_prepend PATH /bin
 
+# Use one MPI installation consistently. In particular, do not inherit MPICH,
+# Ubuntu OpenMPI, or Intel MPI paths from the login environment: mixing their
+# shared libraries makes OpenMPI's mpirun crash before launching any process.
+export LD_LIBRARY_PATH=""
+export LIBRARY_PATH=""
+export CPATH=""
+export PKG_CONFIG_PATH=""
+export CMAKE_PREFIX_PATH=""
+
+path_prepend PATH "$OPENMPI_ROOT/bin"
+path_prepend LD_LIBRARY_PATH "$INTEL_LIBFABRIC_RUNTIME"
+path_prepend LD_LIBRARY_PATH "$INTEL_COMPILER_RUNTIME"
+path_prepend LD_LIBRARY_PATH "$OPENMPI_ROOT/lib"
+path_prepend LIBRARY_PATH "$INTEL_LIBFABRIC_RUNTIME"
+path_prepend LIBRARY_PATH "$INTEL_COMPILER_RUNTIME"
+path_prepend LIBRARY_PATH "$OPENMPI_ROOT/lib"
+path_prepend CPATH "$OPENMPI_ROOT/include"
+path_prepend PKG_CONFIG_PATH "$OPENMPI_ROOT/lib/pkgconfig"
+path_prepend CMAKE_PREFIX_PATH "$OPENMPI_ROOT"
+export OPAL_PREFIX="$OPENMPI_ROOT"
+
 # Use system GCC/G++ explicitly.
 export CC=/usr/bin/gcc
 export CXX=/usr/bin/g++
@@ -149,26 +174,9 @@ case " ${CXXFLAGS:-} " in
     *) export CXXFLAGS="${CXXFLAGS:+$CXXFLAGS }-DOMPI_SKIP_MPICXX" ;;
 esac
 
-# MPI wrapper compilers.
-if command -v mpicc >/dev/null 2>&1; then
-    export MPICC="$(command -v mpicc)"
-fi
-
-if command -v mpicxx >/dev/null 2>&1; then
-    export MPICXX="$(command -v mpicxx)"
-elif command -v mpic++ >/dev/null 2>&1; then
-    export MPICXX="$(command -v mpic++)"
-fi
-
-# Common Ubuntu/Debian OpenMPI library/include paths.
-if [ -d /usr/lib/x86_64-linux-gnu/openmpi/lib ]; then
-    path_prepend LD_LIBRARY_PATH /usr/lib/x86_64-linux-gnu/openmpi/lib
-    path_prepend LIBRARY_PATH /usr/lib/x86_64-linux-gnu/openmpi/lib
-fi
-
-if [ -d /usr/lib/x86_64-linux-gnu/openmpi/include ]; then
-    path_prepend CPATH /usr/lib/x86_64-linux-gnu/openmpi/include
-fi
+# MPI wrapper compilers from the same OpenMPI installation used at runtime.
+export MPICC="$OPENMPI_ROOT/bin/mpicc"
+export MPICXX="$OPENMPI_ROOT/bin/mpicxx"
 
 
 # ------------------------------------------------------------

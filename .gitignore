@@ -38,7 +38,7 @@
 slurm-*.out
 slurm-*.err
 nohup.out
-core
+/core
 core.*
 
 # Python caches and local editor files
@@ -52,3 +52,4 @@ __pycache__/
 
 # Executables produced in source directories by the local cases
 /twoCellShear/twoCellShear
+/twoCellShear/out.txt

@@ -2,28 +2,50 @@
 <hemocell>
 
 <parameters>
-    <warmup> 0 </warmup> <!-- Number of LBM iterations to prepare fluid field. -->
+    <warmup>0</warmup> <!-- Cell-free LBM warm-up iterations. -->
+    <outputDirectory>output</outputDirectory>
+    <checkpointDirectory>checkpoint</checkpointDirectory>
+    <logDirectory>log</logDirectory>
+    <logFile>twoCellShear.log</logFile>
 </parameters>
 
-
 <ibm>
-    <radius> 3.91e-6 </radius> <!-- Radius of the particle in [m] (dx) [3.3e-6, 3.91e-6, XX and 4.284 for shapes [0,1,2,3] respectively -->
+    <radius>3.91e-6</radius> <!-- RBC radius in m. -->
+    <stepMaterialEvery>1</stepMaterialEvery>
+    <stepParticleEvery>1</stepParticleEvery>
 </ibm>
 
 <domain>
-    <shearrate> 111.0 </shearrate>   <!--Shear rate for the fluid domain. [s^-1] [25]. -->
-    <rhoP> 1025 </rhoP>   <!--Density of the surrounding fluid, Physical units [kg/m^3]-->
-    <nuP> 1.1e-6 </nuP>   <!-- Kinematic viscosity of the surrounding fluid, physical units [m^2/s]-->
-    <dx> 0.5e-6 </dx> <!--Physical length of 1 Lattice Unit -->
-    <dt> 0.5e-7 </dt> <!-- Time step for the LBM system. A negative value will set Tau=1 and calc. the corresponding time-step. -->
+    <!-- Nominal physical box dimensions in micrometers. -->
+    <Lx>16.0</Lx>
+    <Ly>16.0</Ly>
+    <Lz>20.0</Lz>
+    <shearrate>111.0</shearrate> <!-- Target shear rate in s^-1. -->
+    <rhoP>1025</rhoP>            <!-- Fluid density in kg/m^3. -->
+    <nuP>1.1e-6</nuP>            <!-- Fluid kinematic viscosity in m^2/s. -->
+    <dx>0.5e-6</dx>              <!-- Physical length of one lattice unit in m. -->
+    <dt>0.5e-7</dt>              <!-- Physical duration of one time step in s. -->
+    <fluidEnvelope>2</fluidEnvelope>
     <particleEnvelope>20</particleEnvelope>
-    <kBT>4.100531391e-21</kBT> <!-- in SI, m2 kg s-2 (or J) for T=300 -->
+    <kBT>4.100531391e-21</kBT>   <!-- Thermal energy in J at 300 K. -->
 </domain>
 
+<Adhesion>
+    <r0>0.3</r0>                 <!-- LJ/Morse transition distance in um. -->
+    <rc>1.1</rc>                 <!-- Adhesion cutoff distance in um. -->
+    <!-- Initial tuning baseline only: epsilon=D0=kBT makes U continuous at r0. -->
+    <epsilon>4.100531391e-21</epsilon> <!-- LJ energy scale in J. -->
+    <D0>4.100531391e-21</D0>           <!-- Morse well depth in J. -->
+    <alpha>3.0</alpha>                 <!-- Morse width parameter in um^-1. -->
+</Adhesion>
+
 <sim>
-    <tmax> 100000 </tmax> <!-- total number of iterations -->
-    <tmeas> 2000 </tmeas> <!-- interval after which data is written --> 
-    <tcheckpoint>500000</tcheckpoint>
+    <!-- Initial staging baseline; tmax includes relaxation and velocity ramp. -->
+    <tRelax>20000</tRelax>
+    <tRamp>0</tRamp>
+    <tmax>100000</tmax>
+    <tmeas>1000</tmeas>
+    <tcheckpoint>20000</tcheckpoint>
 </sim>
 
 </hemocell>
