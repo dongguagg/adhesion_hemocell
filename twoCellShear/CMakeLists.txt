@@ -26,7 +26,7 @@ set(HEMOCELL_LIBRARY "${HEMOCELL_SOURCE_DIR}/build/libhemocell.a")
 if(NOT EXISTS "${HEMOCELL_LIBRARY}")
     message(FATAL_ERROR
         "HemoCell library not found at ${HEMOCELL_LIBRARY}. "
-        "Run twoCellShear/compile.sh to build HemoCell first."
+        "Run src_hemocell/compile.sh first."
     )
 endif()
 

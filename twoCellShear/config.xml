@@ -20,7 +20,7 @@
     <Lx>16.0</Lx>
     <Ly>16.0</Ly>
     <Lz>20.0</Lz>
-    <shearrate>111.0</shearrate> <!-- Target shear rate in s^-1. -->
+    <shearrate>100.0</shearrate> <!-- Target shear rate in s^-1. -->
     <rhoP>1025</rhoP>            <!-- Fluid density in kg/m^3. -->
     <nuP>1.1e-6</nuP>            <!-- Fluid kinematic viscosity in m^2/s. -->
     <dx>0.5e-6</dx>              <!-- Physical length of one lattice unit in m. -->
@@ -30,29 +30,36 @@
     <kBT>4.100531391e-21</kBT>   <!-- Thermal energy in J at 300 K. -->
 </domain>
 
+<decomposition>
+    <!-- MPI process grid used by the regular lattice decomposition. -->
+    <nprocX>1</nprocX>
+    <nprocY>1</nprocY>
+    <nprocZ>2</nprocZ>
+</decomposition>
+
 <cellCellAdhesion>
     <r0>0.2</r0>                 <!-- LJ/Morse transition distance in um. -->
     <rc>1.0</rc>                 <!-- Adhesion cutoff distance in um. -->
     <!-- Tuning values: epsilon=5 kBT for LJ repulsion, D0=10 kBT for adhesion. -->
-    <epsilon>2.050265696e-20</epsilon> <!-- LJ energy scale in J. -->
+    <epsilon>4.100531391e-22</epsilon> <!-- LJ energy scale in J. -->
     <D0>4.100531391e-20</D0>           <!-- Morse well depth in J. -->
     <alpha>3.0</alpha>                 <!-- Morse width parameter in um^-1. -->
 </cellCellAdhesion>
 
 <cellWallAdhesion>
-    <r0>0.2</r0>                 <!-- LJ/Morse transition distance in um. -->
+    <r0>0.3</r0>                 <!-- LJ/Morse transition distance in um. -->
     <rc>1.0</rc>                 <!-- Adhesion cutoff distance in um. -->
     <!-- Initial wall-anchor values: epsilon=10 kBT and D0=20 kBT. -->
-    <epsilon>4.100531391e-20</epsilon> <!-- LJ energy scale in J. -->
+    <epsilon>2.050265696e-21</epsilon> <!-- LJ energy scale in J. -->
     <D0>8.201062782e-20</D0>           <!-- Morse well depth in J. -->
     <alpha>4.0</alpha>                 <!-- Morse width parameter in um^-1. -->
 </cellWallAdhesion>
 
 <sim>
     <!-- Initial staging baseline; tmax includes relaxation and velocity ramp. -->
-    <tRelax>20000</tRelax>
+    <tRelax>40000</tRelax>
     <tRamp>0</tRamp>
-    <tmax>100000</tmax>
+    <tmax>200000</tmax>
     <tmeas>1000</tmeas>
     <tcheckpoint>20000</tcheckpoint>
 </sim>

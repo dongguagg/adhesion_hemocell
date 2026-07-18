@@ -1,7 +1,7 @@
 #!/bin/bash
 
-source ../src_hemocell/loadHemoCell.sh
+source ./loadHemoCell.sh
 mkdir -p build
 cd build || exit 1
 cmake ..
-cmake --build .
+cmake --build . -j 8

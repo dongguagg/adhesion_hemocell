@@ -130,12 +130,6 @@ int main(int argc, char *argv[]) {
   HemoCell hemocell(argv[1], argc, argv);
   Config *cfg = hemocell.cfg;
 
-  if (global::mpi().getSize() != 2) {
-    pcerr << "(TwoCellShear) This case must be run with exactly two MPI ranks."
-          << endl;
-    return -1;
-  }
-
   const T dx = (*cfg)["domain"]["dx"].read<T>();
   const T lx = (*cfg)["domain"]["Lx"].read<T>();
   const T ly = (*cfg)["domain"]["Ly"].read<T>();
@@ -145,15 +139,19 @@ int main(int argc, char *argv[]) {
   const plint nz = static_cast<plint>(lz * 1.0e-6 / dx + 0.5);
   const plint fluidEnvelope =
       (*cfg)["domain"]["fluidEnvelope"].read<plint>();
+  const plint nprocX = (*cfg)["decomposition"]["nprocX"].read<plint>();
+  const plint nprocY = (*cfg)["decomposition"]["nprocY"].read<plint>();
+  const plint nprocZ = (*cfg)["decomposition"]["nprocZ"].read<plint>();
 
   pcout << "(TwoCellShear) Calculating shear-flow parameters" << endl;
   param::lbm_shear_parameters(*cfg, nz);
   param::printParameters();
 
   pcout << "(TwoCellShear) Initializing " << nx << 'x' << ny << 'x' << nz
-        << " lattice with a 1x1x2 block decomposition" << endl;
+        << " lattice with a " << nprocX << 'x' << nprocY << 'x' << nprocZ
+        << " block decomposition" << endl;
   const SparseBlockStructure3D blockStructure =
-      createRegularDistribution3D(nx, ny, nz, 1, 1, 2);
+      createRegularDistribution3D(nx, ny, nz, nprocX, nprocY, nprocZ);
   const MultiBlockManagement3D management(
       blockStructure, new OneToOneThreadAttribution, fluidEnvelope);
   hemocell.initializeLattice(management);
