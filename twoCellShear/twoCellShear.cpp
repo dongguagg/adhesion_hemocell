@@ -82,10 +82,10 @@ void writeCellState(HemoCell &hemocell, plb_ofstream &stream,
   const T velocityToSI = param::dx / param::dt;
   hemo::Array<T, 3> relativeCenter({0.0, 0.0, 0.0});
 
-  const std::map<int, CellInformation>::const_iterator fixed = cellInfo.find(0);
-  const std::map<int, CellInformation>::const_iterator free = cellInfo.find(1);
-  if (fixed != cellInfo.end() && free != cellInfo.end()) {
-    relativeCenter = (free->second.position - fixed->second.position) /
+  const std::map<int, CellInformation>::const_iterator lower = cellInfo.find(0);
+  const std::map<int, CellInformation>::const_iterator upper = cellInfo.find(1);
+  if (lower != cellInfo.end() && upper != cellInfo.end()) {
+    relativeCenter = (upper->second.position - lower->second.position) /
                      micrometerToLbm;
   }
 
@@ -106,7 +106,9 @@ void writeCellState(HemoCell &hemocell, plb_ofstream &stream,
 
     stream << hemocell.iter << ','
            << simulationStage(hemocell.iter, tRelax, tRamp) << ',' << cellId
-           << ',' << (cellId == 0 ? "fixed" : "free") << ',' << topVelocity
+           << ','
+           << (cellId == 0 ? "lower_wall_adhering" : "upper") << ','
+           << topVelocity
            << ',' << topVelocity * param::dx / param::dt << ',' << position[0]
            << ',' << position[1] << ',' << position[2] << ',' << velocity[0]
            << ',' << velocity[1] << ',' << velocity[2] << ',' << bbox[0] << ','
@@ -190,17 +192,29 @@ int main(int argc, char *argv[]) {
       (*cfg)["ibm"]["stepParticleEvery"].read<unsigned int>());
   hemocell.setAdhesionTimeScaleSeperation(1);
 
-  // The first entry in RBC.pos is cellId 0 and remains fixed throughout the
-  // relaxation, ramp and shear stages. The fixed-cell hook is implemented in
-  // HemoCell so it is also applied during all particle substeps.
-  hemocell.setCellFixed(0);
+  const T cellCellR0 = (*cfg)["cellCellAdhesion"]["r0"].read<T>();
+  const T cellCellRc = (*cfg)["cellCellAdhesion"]["rc"].read<T>();
+  const T cellCellEpsilon =
+      (*cfg)["cellCellAdhesion"]["epsilon"].read<T>();
+  const T cellCellD0 = (*cfg)["cellCellAdhesion"]["D0"].read<T>();
+  const T cellCellAlpha = (*cfg)["cellCellAdhesion"]["alpha"].read<T>();
+  hemocell.setAdhesion(cellCellR0, cellCellRc, cellCellEpsilon, cellCellD0,
+                       cellCellAlpha);
 
-  hemocell.setAdhesion(
-      (*cfg)["Adhesion"]["r0"].read<T>(),
-      (*cfg)["Adhesion"]["rc"].read<T>(),
-      (*cfg)["Adhesion"]["epsilon"].read<T>(),
-      (*cfg)["Adhesion"]["D0"].read<T>(),
-      (*cfg)["Adhesion"]["alpha"].read<T>());
+  const T cellWallR0 = (*cfg)["cellWallAdhesion"]["r0"].read<T>();
+  const T cellWallRc = (*cfg)["cellWallAdhesion"]["rc"].read<T>();
+  const T cellWallEpsilon =
+      (*cfg)["cellWallAdhesion"]["epsilon"].read<T>();
+  const T cellWallD0 = (*cfg)["cellWallAdhesion"]["D0"].read<T>();
+  const T cellWallAlpha = (*cfg)["cellWallAdhesion"]["alpha"].read<T>();
+  hemocell.setBoundaryAdhesion(cellWallR0, cellWallRc, cellWallEpsilon,
+                               cellWallD0, cellWallAlpha);
+
+  const T maximumAttractionRatio =
+      cellWallAlpha * cellWallD0 / (cellCellAlpha * cellCellD0);
+  pcout << "(TwoCellShear) Cell-wall maximum pair attraction is "
+        << maximumAttractionRatio
+        << " times the cell-cell maximum pair attraction" << endl;
 
   hemocell.setOutputs(
       "RBC", {OUTPUT_POSITION, OUTPUT_TRIANGLES, OUTPUT_VELOCITY, OUTPUT_FORCE,
@@ -238,7 +252,7 @@ int main(int argc, char *argv[]) {
     const std::string cellLogName =
         global::directories().getOutputDir() + "twoCellShear.csv";
     cellLog.open(cellLogName.c_str());
-    cellLog << "iteration,stage,cell_id,mobility,top_wall_velocity_lbm,"
+    cellLog << "iteration,stage,cell_id,role,top_wall_velocity_lbm,"
                "top_wall_velocity_m_per_s,center_x_um,center_y_um,center_z_um,"
                "velocity_x_m_per_s,velocity_y_m_per_s,velocity_z_m_per_s,"
                "bbox_x_min_um,bbox_x_max_um,bbox_y_min_um,bbox_y_max_um,"
