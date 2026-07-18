@@ -234,8 +234,14 @@ void HemoCell::writeOutput() {
   if(repulsionEnabled) {
     cellfields->applyRepulsionForce();
   }
-  if(adhesionEnabled) {
-    cellfields->applyAdhesionForce();
+  if(adhesionEnabled || boundaryAdhesionEnabled) {
+    cellfields->clearInteractionForce();
+    if(adhesionEnabled) {
+      cellfields->applyAdhesionForce();
+    }
+    if(boundaryAdhesionEnabled) {
+      cellfields->applyBoundaryAdhesionForce();
+    }
   }
   if(boundaryRepulsionEnabled) {
     cellfields->applyBoundaryRepulsionForce();
@@ -310,8 +316,15 @@ void HemoCell::iterate() {
   if(repulsionEnabled && iter % cellfields->repulsionTimescale == 0) {
     cellfields->applyRepulsionForce();
   }
-  if(adhesionEnabled && iter % cellfields->adhesionTimescale == 0) {
-    cellfields->applyAdhesionForce();
+  if((adhesionEnabled || boundaryAdhesionEnabled) &&
+     iter % cellfields->adhesionTimescale == 0) {
+    cellfields->clearInteractionForce();
+    if(adhesionEnabled) {
+      cellfields->applyAdhesionForce();
+    }
+    if(boundaryAdhesionEnabled) {
+      cellfields->applyBoundaryAdhesionForce();
+    }
   }
   if(boundaryRepulsionEnabled && iter % cellfields->boundaryRepulsionTimescale == 0) {
     cellfields->applyBoundaryRepulsionForce();
@@ -457,15 +470,52 @@ void HemoCell::setAdhesion(T r0, T rc, T epsilon, T D0, T alpha) {
   hlog << "(HemoCell) (Adhesion) Setting r0 to " << r0 << " µm, cutoff to " << rc
        << " µm, epsilon to " << epsilon << " J, D0 to " << D0
        << " J, and alpha to " << alpha << " µm^-1" << endl;
+  hlog << "(HemoCell) (Adhesion) LBM parameters: r0=" << cellfields->adhesionR0
+       << ", cutoff=" << cellfields->adhesionCutoff
+       << ", sigma=" << cellfields->adhesionSigma
+       << ", epsilon=" << cellfields->adhesionEpsilon
+       << ", D0=" << cellfields->adhesionD0
+       << ", alpha=" << cellfields->adhesionAlpha << endl;
   hlogfile << "(HemoCell) (Adhesion) Enabling adhesion." << endl;
   repulsionEnabled = false;
   adhesionEnabled = true;
 }
 
-void HemoCell::setCellFixed(plint cellId) {
-  hlog << "(HemoCell) (Fixed Cell) Fixing cell " << cellId << endl;
-  cellfields->fixedCellId = cellId;
-  cellfields->fixedCellEnabled = true;
+void HemoCell::setBoundaryAdhesion(T r0, T rc, T epsilon, T D0, T alpha) {
+  if (r0 <= 0.0 || rc <= r0 || epsilon <= 0.0 || D0 <= 0.0 || alpha <= 0.0 ||
+      param::dx <= 0.0 || param::df <= 0.0) {
+    pcerr << "(HemoCell) (Boundary Adhesion) Invalid adhesion parameters." << endl;
+    exit(1);
+  }
+
+  const T micrometerToLbm = 1e-6/param::dx;
+  const T jouleToLbm = 1.0/(param::df*param::dx);
+
+  cellfields->boundaryAdhesionR0 = r0*micrometerToLbm;
+  cellfields->boundaryAdhesionCutoff = rc*micrometerToLbm;
+  cellfields->boundaryAdhesionSigma =
+      cellfields->boundaryAdhesionR0/pow(2.0, 1.0/6.0);
+  cellfields->boundaryAdhesionEpsilon = epsilon*jouleToLbm;
+  cellfields->boundaryAdhesionD0 = D0*jouleToLbm;
+  cellfields->boundaryAdhesionAlpha = alpha/micrometerToLbm;
+
+  hlog << "(HemoCell) (Boundary Adhesion) Setting r0 to " << r0
+       << " µm, cutoff to " << rc << " µm, epsilon to " << epsilon
+       << " J, D0 to " << D0 << " J, and alpha to " << alpha
+       << " µm^-1" << endl;
+  hlog << "(HemoCell) (Boundary Adhesion) LBM parameters: r0="
+       << cellfields->boundaryAdhesionR0
+       << ", cutoff=" << cellfields->boundaryAdhesionCutoff
+       << ", sigma=" << cellfields->boundaryAdhesionSigma
+       << ", epsilon=" << cellfields->boundaryAdhesionEpsilon
+       << ", D0=" << cellfields->boundaryAdhesionD0
+       << ", alpha=" << cellfields->boundaryAdhesionAlpha << endl;
+  hlogfile << "(HemoCell) (Boundary Adhesion) Enabling boundary adhesion."
+           << endl;
+
+  cellfields->populateBoundaryParticles();
+  boundaryRepulsionEnabled = false;
+  boundaryAdhesionEnabled = true;
 }
 
 void HemoCell::enableBoundaryParticles(T boundaryRepulsionConstant, T boundaryRepulsionCutoff, unsigned int timestep) {
@@ -475,6 +525,7 @@ void HemoCell::enableBoundaryParticles(T boundaryRepulsionConstant, T boundaryRe
   cellfields->boundaryRepulsionConstant = boundaryRepulsionConstant;
   cellfields->boundaryRepulsionCutoff = boundaryRepulsionCutoff*(1e-6/param::dx);
   cellfields->boundaryRepulsionTimescale = timestep;
+  boundaryAdhesionEnabled = false;
   boundaryRepulsionEnabled = true;
 }
 
@@ -644,6 +695,13 @@ void HemoCell::sanityCheck() {
     if (cellfields->boundaryRepulsionTimescale%cellfields->particleVelocityUpdateTimescale!=0) {
      hlog << "(HemoCell) Error, Particle velocity timescale separation cannot divide this repulsion timescale separation, exiting ..." <<endl;
      exit(1);
+    }
+  }
+
+  if (adhesionEnabled || boundaryAdhesionEnabled) {
+    if (cellfields->adhesionTimescale%cellfields->particleVelocityUpdateTimescale!=0) {
+      hlog << "(HemoCell) Error, Particle velocity timescale separation cannot divide this adhesion timescale separation, exiting ..." <<endl;
+      exit(1);
     }
   }
   

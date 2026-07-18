@@ -141,14 +141,17 @@ class HemoCell {
   bool repulsionEnabled = false;
   bool adhesionEnabled = false;
   bool boundaryRepulsionEnabled = false;
+  bool boundaryAdhesionEnabled = false;
   void setRepulsion(T repulsionConstant, T repulsionCutoff);
 
   //Sets cell-cell adhesion parameters and enables adhesion. Distances are in
   //micrometers, energy scales in joules, and alpha in inverse micrometers.
   void setAdhesion(T r0, T rc, T epsilon, T D0, T alpha);
 
-  //Keep all membrane nodes of one cell fixed while retaining their forces.
-  void setCellFixed(plint cellId);
+  //Sets cell-boundary adhesion parameters and enables boundary adhesion.
+  //Distances are in micrometers, energy scales in joules, and alpha in
+  //inverse micrometers.
+  void setBoundaryAdhesion(T r0, T rc, T epsilon, T D0, T alpha);
 
   // Lees-Edwards boundary condition
   bool leesEdwardsBC = false;

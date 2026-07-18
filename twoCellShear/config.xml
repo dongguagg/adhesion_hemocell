@@ -33,9 +33,9 @@
 <Adhesion>
     <r0>0.3</r0>                 <!-- LJ/Morse transition distance in um. -->
     <rc>1.1</rc>                 <!-- Adhesion cutoff distance in um. -->
-    <!-- Initial tuning baseline only: epsilon=D0=kBT makes U continuous at r0. -->
-    <epsilon>4.100531391e-21</epsilon> <!-- LJ energy scale in J. -->
-    <D0>4.100531391e-21</D0>           <!-- Morse well depth in J. -->
+    <!-- Tuning values: epsilon=5 kBT for LJ repulsion, D0=10 kBT for adhesion. -->
+    <epsilon>2.050265696e-20</epsilon> <!-- LJ energy scale in J. -->
+    <D0>4.100531391e-20</D0>           <!-- Morse well depth in J. -->
     <alpha>3.0</alpha>                 <!-- Morse width parameter in um^-1. -->
 </Adhesion>
 

@@ -63,6 +63,7 @@ public:
     virtual void advanceParticles();
     void applyRepulsionForce(bool forced = false);
     void applyAdhesionForce(bool forced = false);
+    void clearInteractionForce();
     virtual void interpolateFluidVelocity(plb::Box3D domain);
     virtual void spreadParticleForce(plb::Box3D domain);
     void separateForceVectors();
@@ -77,6 +78,7 @@ public:
     void syncEnvelopes();
     void populateBoundaryParticles();
     void applyBoundaryRepulsionForce();
+    void applyBoundaryAdhesionForce();
     void populateBindingSites(plb::Box3D & domain);
 
     T eigenValueFromCell(plb::Cell<T,DESCRIPTOR> & cell);

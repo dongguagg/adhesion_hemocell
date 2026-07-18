@@ -566,10 +566,6 @@ void HemoCellParticleField::setlocalDomain(Box3D & localDomain_) {
 
 void HemoCellParticleField::advanceParticles() {
   for(HemoCellParticle & particle:particles){
-    if (cellFields->isCellFixed(particle.sv.cellId)) {
-      particle.sv.v = {0.0,0.0,0.0};
-      continue;
-    }
     particle.advance();
     //By lack of better place, check if it is on a boundary, if so, delete it
     plb::Box3D const box = atomicLattice->getBoundingBox();
@@ -680,11 +676,18 @@ void HemoCellParticleField::applyConstitutiveModel(bool forced) {
 }
 
 void HemoCellParticleField::applyRepulsionForce(bool forced) {
+  clearInteractionForce();
   applyCellCellInteraction(false);
 }
 
 void HemoCellParticleField::applyAdhesionForce(bool forced) {
   applyCellCellInteraction(true);
+}
+
+void HemoCellParticleField::clearInteractionForce() {
+  for (HemoCellParticle & particle : particles) {
+    particle.sv.force_repulsion = {0.,0.,0.};
+  }
 }
 
 void HemoCellParticleField::applyCellCellInteraction(bool adhesion) {
@@ -694,9 +697,6 @@ void HemoCellParticleField::applyCellCellInteraction(bool adhesion) {
 
   if(!pg_up_to_date) {
     update_pg();
-  }
-  for (HemoCellParticle & particle : particles) {
-    particle.sv.force_repulsion = {0.,0.,0.};
   }
 
   const int nx = atomicLattice->getNx();
@@ -851,12 +851,6 @@ void HemoCellParticleField::interpolateFluidVelocity(Box3D domain) {
   plb::Array<T,3> velocity_comp;
 
   for (HemoCellParticle &particle:particles) {
-
-    if (cellFields->isCellFixed(particle.sv.cellId)) {
-      particle.sv.v = {0.0,0.0,0.0};
-      continue;
-    }
-
     // Trick to allow for different kernels for different particle types.
     // (*cellFields)[particle.sv.celltype]->kernelMethod(*atomicLattice,particle);
 
@@ -897,6 +891,7 @@ void HemoCellParticleField::spreadParticleForce(Box3D domain) {
 }
 
 void HemoCellParticleField::populateBoundaryParticles() {
+  boundaryParticles.clear();
 
   for (int x = 0; x < this->atomicLattice->getNx()-1; x++) {
     for (int y = 0; y < this->atomicLattice->getNy()-1; y++) {
@@ -944,6 +939,71 @@ void HemoCellParticleField::applyBoundaryRepulsionForce() {
               const hemo::Array<T, 3> rfm = br_const * (1/(distance/br_cutoff))  * (dv/distance);
               lParticle.sv.force_repulsion = lParticle.sv.force_repulsion + rfm; 
             } 
+          }
+        }
+      }
+    }
+  }
+}
+
+void HemoCellParticleField::applyBoundaryAdhesionForce() {
+  if(!pg_up_to_date) {
+    update_pg();
+  }
+
+  const T cutoff = cellFields->boundaryAdhesionCutoff;
+  const T cutoffSquared = cutoff*cutoff;
+  const int neighborRange = static_cast<int>(std::ceil(cutoff));
+  const int nx = atomicLattice->getNx();
+  const int ny = atomicLattice->getNy();
+  const int nz = atomicLattice->getNz();
+  const Dot3D location = atomicLattice->getLocation();
+
+  for (const Dot3D & boundaryParticle : boundaryParticles) {
+    for (int x = boundaryParticle.x-neighborRange;
+         x <= boundaryParticle.x+neighborRange; ++x) {
+      if (x < 0 || x >= nx) { continue; }
+      for (int y = boundaryParticle.y-neighborRange;
+           y <= boundaryParticle.y+neighborRange; ++y) {
+        if (y < 0 || y >= ny) { continue; }
+        for (int z = boundaryParticle.z-neighborRange;
+             z <= boundaryParticle.z+neighborRange; ++z) {
+          if (z < 0 || z >= nz) { continue; }
+
+          const int index = grid_index(x,y,z);
+          for (unsigned int i = 0; i < particle_grid_size[index]; ++i) {
+            HemoCellParticle & particle = particles[particle_grid[index][i]];
+            const hemo::Array<T,3> dv = particle.sv.position-
+                (boundaryParticle+location);
+            const T distanceSquared = dv[0]*dv[0]+dv[1]*dv[1]+dv[2]*dv[2];
+            if (distanceSquared <= 0.0 || distanceSquared >= cutoffSquared) {
+              continue;
+            }
+
+            const T distance = std::sqrt(distanceSquared);
+            T forceMagnitude;
+            if (distance < cellFields->boundaryAdhesionR0) {
+              const T sigmaRatioSquared =
+                  cellFields->boundaryAdhesionSigma*
+                  cellFields->boundaryAdhesionSigma/distanceSquared;
+              const T sigmaRatioSixth = sigmaRatioSquared*sigmaRatioSquared*
+                                        sigmaRatioSquared;
+              forceMagnitude = 24.0*cellFields->boundaryAdhesionEpsilon/distance*
+                               (2.0*sigmaRatioSixth*sigmaRatioSixth-
+                                sigmaRatioSixth);
+            } else {
+              const T morseExponent = std::exp(
+                  -cellFields->boundaryAdhesionAlpha*
+                  (distance-cellFields->boundaryAdhesionR0));
+              forceMagnitude = 2.0*cellFields->boundaryAdhesionAlpha*
+                               cellFields->boundaryAdhesionD0*
+                               (morseExponent*morseExponent-morseExponent);
+            }
+
+            const hemo::Array<T,3> interactionForce =
+                forceMagnitude*(dv/distance);
+            particle.sv.force_repulsion =
+                particle.sv.force_repulsion+interactionForce;
           }
         }
       }

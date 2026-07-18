@@ -580,6 +580,20 @@ void HemoCellFields::applyAdhesionForce() {
   global.statistics.getCurrent().stop();
 }
 
+void HemoCellFields::HemoClearInteractionForce::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks) {
+    dynamic_cast<HemoCellParticleField*>(blocks[0])->clearInteractionForce();
+}
+void HemoCellFields::clearInteractionForce() {
+  global.statistics.getCurrent()["clearInteractionForce"].start();
+
+  vector<MultiBlock3D*>wrapper;
+  wrapper.push_back(immersedParticles);
+  HemoClearInteractionForce * fnct = new HemoClearInteractionForce();
+  applyProcessingFunctional(fnct,immersedParticles->getBoundingBox(),wrapper);
+
+  global.statistics.getCurrent().stop();
+}
+
 void HemoCellFields::HemoBoundaryRepulsionForce::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks) {
     dynamic_cast<HemoCellParticleField*>(blocks[0])->applyBoundaryRepulsionForce();
 }
@@ -589,6 +603,20 @@ void HemoCellFields::applyBoundaryRepulsionForce() {
   vector<MultiBlock3D*>wrapper;
   wrapper.push_back(immersedParticles);
   HemoBoundaryRepulsionForce * fnct = new HemoBoundaryRepulsionForce();
+  applyProcessingFunctional(fnct,immersedParticles->getBoundingBox(),wrapper);
+
+  global.statistics.getCurrent().stop();
+}
+
+void HemoCellFields::HemoBoundaryAdhesionForce::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks) {
+    dynamic_cast<HemoCellParticleField*>(blocks[0])->applyBoundaryAdhesionForce();
+}
+void HemoCellFields::applyBoundaryAdhesionForce() {
+  global.statistics.getCurrent()["boundaryAdhesionForce"].start();
+
+  vector<MultiBlock3D*>wrapper;
+  wrapper.push_back(immersedParticles);
+  HemoBoundaryAdhesionForce * fnct = new HemoBoundaryAdhesionForce();
   applyProcessingFunctional(fnct,immersedParticles->getBoundingBox(),wrapper);
 
   global.statistics.getCurrent().stop();
@@ -732,7 +760,9 @@ HemoCellFields::HemoApplyConstitutiveModel * HemoCellFields::HemoApplyConstituti
 HemoCellFields::HemoSyncEnvelopes *        HemoCellFields::HemoSyncEnvelopes::clone() const { return new HemoCellFields::HemoSyncEnvelopes(*this);}
 HemoCellFields::HemoRepulsionForce *        HemoCellFields::HemoRepulsionForce::clone() const { return new HemoCellFields::HemoRepulsionForce(*this);}
 HemoCellFields::HemoAdhesionForce *        HemoCellFields::HemoAdhesionForce::clone() const { return new HemoCellFields::HemoAdhesionForce(*this);}
+HemoCellFields::HemoClearInteractionForce * HemoCellFields::HemoClearInteractionForce::clone() const { return new HemoCellFields::HemoClearInteractionForce(*this);}
 HemoCellFields::HemoBoundaryRepulsionForce *        HemoCellFields::HemoBoundaryRepulsionForce::clone() const { return new HemoCellFields::HemoBoundaryRepulsionForce(*this);}
+HemoCellFields::HemoBoundaryAdhesionForce * HemoCellFields::HemoBoundaryAdhesionForce::clone() const { return new HemoCellFields::HemoBoundaryAdhesionForce(*this);}
 HemoCellFields::HemoDeleteIncompleteCells *        HemoCellFields::HemoDeleteIncompleteCells::clone() const { return new HemoCellFields::HemoDeleteIncompleteCells(*this);}
 HemoCellFields::HemoGetParticles *        HemoCellFields::HemoGetParticles::clone() const { return new HemoCellFields::HemoGetParticles(*this);}
 HemoCellFields::HemoSetParticles *        HemoCellFields::HemoSetParticles::clone() const { return new HemoCellFields::HemoSetParticles(*this);}

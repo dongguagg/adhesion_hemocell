@@ -126,8 +126,14 @@ public:
   /// Apply (and calculate) the adhesion force between particles
   void applyAdhesionForce();
 
+  /// Clear the shared non-constitutive interaction force slot
+  void clearInteractionForce();
+
   /// Apply (and calculate) the repulsion force between particles and the boundary
   void applyBoundaryRepulsionForce();
+
+  /// Apply (and calculate) the adhesion force between particles and the boundary
+  void applyBoundaryAdhesionForce();
   
   /// Delete any incomplete cells on a block
   void deleteIncompleteCells(bool verbose = true);
@@ -199,9 +205,13 @@ public:
   ///Timescale seperation for adhesion, set through hemocell.h
   pluint adhesionTimescale = 1;
 
-  ///Cell whose membrane nodes remain fixed while still exerting forces.
-  bool fixedCellEnabled = false;
-  plint fixedCellId = 0;
+  ///Boundary adhesion variables set through hemocell.h, stored in lattice units
+  T boundaryAdhesionR0 = 0.0;
+  T boundaryAdhesionCutoff = 0.0;
+  T boundaryAdhesionSigma = 0.0;
+  T boundaryAdhesionEpsilon = 0.0;
+  T boundaryAdhesionD0 = 0.0;
+  T boundaryAdhesionAlpha = 0.0;
 
   ///Boundary repulsion variable set through hemocell.h
   T boundaryRepulsionCutoff = 0.0;
@@ -235,13 +245,6 @@ public:
    int number_of_cells = 0;
    inline int base_cell_id(int wrapped) const {
      return ((wrapped%number_of_cells)+number_of_cells)%number_of_cells;
-   }
-   inline bool isCellFixed(plint cellId) const {
-     if (!fixedCellEnabled) {
-       return false;
-     }
-     return number_of_cells > 0 ? base_cell_id(cellId) == fixedCellId
-                                : cellId == fixedCellId;
    }
    unsigned int max_neighbours = 0;
    
@@ -298,9 +301,17 @@ public:
    void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);
    HemoAdhesionForce * clone() const;
   };
+  class HemoClearInteractionForce: public HemoCellFunctional {
+   void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);
+   HemoClearInteractionForce * clone() const;
+  };
   class HemoBoundaryRepulsionForce: public HemoCellFunctional {
    void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);
    HemoBoundaryRepulsionForce * clone() const;
+  };
+  class HemoBoundaryAdhesionForce: public HemoCellFunctional {
+   void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);
+   HemoBoundaryAdhesionForce * clone() const;
   };
   class HemoDeleteIncompleteCells: public HemoCellFunctional {
    void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);
