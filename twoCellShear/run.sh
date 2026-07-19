@@ -2,4 +2,4 @@
 
 source ../src_hemocell/loadHemoCell.sh
 
-mpirun -np 2 ./twoCellShear config.xml 2>&1 | tee out.txt
+mpirun -np 12 ./twoCellShear config.xml 2>&1 | tee out.txt

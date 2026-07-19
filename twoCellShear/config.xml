@@ -17,8 +17,8 @@
 
 <domain>
     <!-- Nominal physical box dimensions in micrometers. -->
-    <Lx>16.0</Lx>
-    <Ly>16.0</Ly>
+    <Lx>30.0</Lx>
+    <Ly>20.0</Ly>
     <Lz>20.0</Lz>
     <shearrate>100.0</shearrate> <!-- Target shear rate in s^-1. -->
     <rhoP>1025</rhoP>            <!-- Fluid density in kg/m^3. -->
@@ -32,8 +32,8 @@
 
 <decomposition>
     <!-- MPI process grid used by the regular lattice decomposition. -->
-    <nprocX>1</nprocX>
-    <nprocY>1</nprocY>
+    <nprocX>3</nprocX>
+    <nprocY>2</nprocY>
     <nprocZ>2</nprocZ>
 </decomposition>
 
@@ -42,26 +42,26 @@
     <rc>1.0</rc>                 <!-- Adhesion cutoff distance in um. -->
     <!-- Tuning values: epsilon=5 kBT for LJ repulsion, D0=10 kBT for adhesion. -->
     <epsilon>4.100531391e-22</epsilon> <!-- LJ energy scale in J. -->
-    <D0>4.100531391e-20</D0>           <!-- Morse well depth in J. -->
+    <D0>4.100531391e-21</D0>           <!-- Morse well depth in J. -->
     <alpha>3.0</alpha>                 <!-- Morse width parameter in um^-1. -->
 </cellCellAdhesion>
 
 <cellWallAdhesion>
-    <r0>0.3</r0>                 <!-- LJ/Morse transition distance in um. -->
+    <r0>0.45</r0>                 <!-- LJ/Morse transition distance in um. -->
     <rc>1.0</rc>                 <!-- Adhesion cutoff distance in um. -->
     <!-- Initial wall-anchor values: epsilon=10 kBT and D0=20 kBT. -->
-    <epsilon>2.050265696e-21</epsilon> <!-- LJ energy scale in J. -->
+    <epsilon>2.050265696e-20</epsilon> <!-- LJ energy scale in J. -->
     <D0>8.201062782e-20</D0>           <!-- Morse well depth in J. -->
     <alpha>4.0</alpha>                 <!-- Morse width parameter in um^-1. -->
 </cellWallAdhesion>
 
 <sim>
     <!-- Initial staging baseline; tmax includes relaxation and velocity ramp. -->
-    <tRelax>40000</tRelax>
+    <tRelax>50000</tRelax>
     <tRamp>0</tRamp>
-    <tmax>200000</tmax>
-    <tmeas>1000</tmeas>
-    <tcheckpoint>20000</tcheckpoint>
+    <tmax>1000000</tmax>
+    <tmeas>10000</tmeas>
+    <tcheckpoint>50000</tcheckpoint>
 </sim>
 
 </hemocell>
