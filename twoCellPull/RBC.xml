@@ -1,0 +1,15 @@
+<?xml version="1.0" ?>
+<hemocell>
+<MaterialModel>
+    <comment>Parameters for the HO RBC constitutive model.</comment>
+    <name>RBC</name>
+    <eta_m> 0.0 </eta_m>
+    <kBend> 80.0 </kBend>
+    <kVolume> 20.0 </kVolume>
+    <kArea> 5.0 </kArea>
+    <kLink> 15.0 </kLink>
+    <minNumTriangles> 600 </minNumTriangles>
+    <radius> 3.91e-6 </radius>
+    <Volume> 90 </Volume>
+</MaterialModel>
+</hemocell>

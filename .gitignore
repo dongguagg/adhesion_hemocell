@@ -53,3 +53,5 @@ __pycache__/
 # Executables produced in source directories by the local cases
 /twoCellShear/twoCellShear
 /twoCellShear/out.txt
+/twoCellPull/twoCellPull
+/twoCellPull/out.txt

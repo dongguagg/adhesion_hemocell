@@ -1,0 +1,83 @@
+<?xml version="1.0" ?>
+<hemocell>
+
+<parameters>
+    <warmup>0</warmup> <!-- Cell-free LBM warm-up iterations. -->
+    <outputDirectory>output</outputDirectory>
+    <checkpointDirectory>checkpoint</checkpointDirectory>
+    <logDirectory>log</logDirectory>
+    <logFile>twoCellPull.log</logFile>
+</parameters>
+
+<ibm>
+    <radius>3.91e-6</radius> <!-- RBC radius in m. -->
+    <!-- Surface loading requires both timescales to remain one. -->
+    <stepMaterialEvery>1</stepMaterialEvery>
+    <stepParticleEvery>1</stepParticleEvery>
+</ibm>
+
+<domain>
+    <!-- Baseline copied from twoCellShear; dimensions are in micrometers. -->
+    <Lx>30.0</Lx>
+    <Ly>20.0</Ly>
+    <Lz>20.0</Lz>
+    <rhoP>1025</rhoP>            <!-- Fluid density in kg/m^3. -->
+    <nuP>1.1e-6</nuP>            <!-- Fluid kinematic viscosity in m^2/s. -->
+    <dx>0.5e-6</dx>              <!-- Physical length of one lattice unit in m. -->
+    <dt>0.5e-7</dt>              <!-- Physical duration of one time step in s. -->
+    <fluidEnvelope>2</fluidEnvelope>
+    <particleEnvelope>20</particleEnvelope>
+    <kBT>4.100531391e-21</kBT>   <!-- Thermal energy in J at 300 K. -->
+</domain>
+
+<decomposition>
+    <!-- mpirun rank count must equal nprocX*nprocY*nprocZ. -->
+    <nprocX>3</nprocX>
+    <nprocY>2</nprocY>
+    <nprocZ>2</nprocZ>
+</decomposition>
+
+<cellCellAdhesion>
+    <r0>0.2</r0>                       <!-- Distance in um. -->
+    <rc>1.0</rc>                       <!-- Distance in um. -->
+    <epsilon>4.100531391e-22</epsilon> <!-- Energy in J. -->
+    <D0>4.100531391e-21</D0>           <!-- Energy in J. -->
+    <alpha>3.0</alpha>                 <!-- Width in um^-1. -->
+</cellCellAdhesion>
+
+<cellWallAdhesion>
+    <r0>0.45</r0>                      <!-- Distance in um. -->
+    <rc>1.0</rc>                       <!-- Distance in um. -->
+    <epsilon>2.050265696e-20</epsilon> <!-- Energy in J. -->
+    <D0>8.201062782e-20</D0>           <!-- Energy in J. -->
+    <alpha>4.0</alpha>                 <!-- Width in um^-1. -->
+</cellWallAdhesion>
+
+<surfaceForce>
+    <!-- cellId=0 is lower/wall-adhering; cellId=1 is upper. -->
+    <targetCellId>1</targetCellId>
+    <!-- xPositive/xNegative/yPositive/yNegative/zPositive/zNegative -->
+    <face>zPositive</face>
+
+    <!-- Total laboratory-frame force vector in pN. -->
+    <forceX>0.0</forceX>
+    <forceY>0.0</forceY>
+    <forceZ>50.0</forceZ>
+
+    <!-- geodesicRadius or oneRing; radius is used by geodesicRadius [um]. -->
+    <patchMode>geodesicRadius</patchMode>
+    <patchGeodesicRadius>0.70</patchGeodesicRadius>
+    <!-- nodalArea or uniform. -->
+    <weighting>nodalArea</weighting>
+</surfaceForce>
+
+<sim>
+    <!-- tmax includes relaxation; zero ramp applies the configured force directly. -->
+    <tRelax>50000</tRelax>
+    <tForceRamp>0</tForceRamp>
+    <tmax>1000000</tmax>
+    <tmeas>10000</tmeas>
+    <tcheckpoint>50000</tcheckpoint>
+</sim>
+
+</hemocell>
