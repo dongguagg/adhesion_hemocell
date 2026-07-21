@@ -34,6 +34,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <fstream>
 #include <queue>
 #include <set>
 #include <tuple>
@@ -506,6 +507,18 @@ int main(int argc, char* argv[]) {
       {OUTPUT_VELOCITY, OUTPUT_DENSITY, OUTPUT_FORCE, OUTPUT_BOUNDARY});
 
   if (!cfg->checkpointed) {
+    std::ifstream rbcPositions("RBC.pos");
+    if (!rbcPositions.good()) {
+      pcout << "(Bifurcation) Fresh run requires the existing RBC.pos input "
+               "in the case directory."
+            << endl;
+      delete outletBoundary;
+      return EXIT_FAILURE;
+    }
+    pcout << "(Bifurcation) Fresh run uses the existing RBC.pos directly; "
+             "the case does not generate, rewrite, or adjust that file."
+          << endl;
+
     const plint warmup = (*cfg)["parameters"]["warmup"].read<plint>();
     pcout << "(Bifurcation) Warming up the cell-free flow for " << warmup
           << " iterations." << endl;
@@ -524,6 +537,9 @@ int main(int argc, char* argv[]) {
     hemocell.loadParticles();
     hemocell.writeOutput();
   } else {
+    pcout << "(Bifurcation) Checkpoint restart restores particle fields from "
+             "the checkpoint; RBC.pos is not read."
+          << endl;
     hemocell.loadCheckPoint();
     if (!configureSolidBoundaryRepulsion(
             hemocell, boundaryRepulsionConstant, boundaryRepulsionCutoff,
@@ -541,8 +557,8 @@ int main(int argc, char* argv[]) {
   const unsigned int tcheckpoint =
       (*cfg)["sim"]["tcheckpoint"].read<unsigned int>();
 
-  pcout << "(Bifurcation) Starting pure-RBC stage-C adhesion and solid-wall-"
-           "repulsion baseline."
+  pcout << "(Bifurcation) Starting pure-RBC flow with RBC-RBC adhesion and "
+           "solid-wall repulsion."
         << endl;
   while (hemocell.iter < tmax) {
     // Install the force before the pre-inlet collide-and-stream performed by
