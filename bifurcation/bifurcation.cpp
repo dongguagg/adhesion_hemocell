@@ -468,13 +468,33 @@ int main(int argc, char* argv[]) {
 
   const unsigned int interactionEvery =
       (*cfg)["ibm"]["stepInteractionEvery"].read<unsigned int>();
+  if (interactionEvery == 0) {
+    pcout << "(Bifurcation) stepInteractionEvery must be greater than zero."
+          << endl;
+    delete outletBoundary;
+    return EXIT_FAILURE;
+  }
+
+  const T cellCellR0 = (*cfg)["cellCellAdhesion"]["r0"].read<T>();
+  const T cellCellRc = (*cfg)["cellCellAdhesion"]["rc"].read<T>();
+  const T cellCellEpsilon =
+      (*cfg)["cellCellAdhesion"]["epsilon"].read<T>();
+  const T cellCellD0 = (*cfg)["cellCellAdhesion"]["D0"].read<T>();
+  const T cellCellAlpha =
+      (*cfg)["cellCellAdhesion"]["alpha"].read<T>();
   const T boundaryRepulsionConstant =
       (*cfg)["boundaryRepulsion"]["constant"].read<T>();
   const T boundaryRepulsionCutoff =
       (*cfg)["boundaryRepulsion"]["cutoff"].read<T>();
 
-  // Stage B enables only the original RBC-wall repulsion. RBC-RBC adhesion is
-  // added in a later stage.
+  hemocell.setAdhesion(cellCellR0, cellCellRc, cellCellEpsilon, cellCellD0,
+                       cellCellAlpha);
+  hemocell.setAdhesionTimeScaleSeperation(interactionEvery);
+  pcout << "(Bifurcation) RBC-RBC adhesion and RBC-wall repulsion update every "
+        << interactionEvery << " iteration(s)." << endl;
+
+  // OUTPUT_FORCE_REPULSION contains the sum of RBC-RBC adhesion and original
+  // solid-wall repulsion.
   vector<int> cellOutputs = {
       OUTPUT_POSITION,      OUTPUT_TRIANGLES,    OUTPUT_VELOCITY,
       OUTPUT_FORCE,         OUTPUT_FORCE_VOLUME, OUTPUT_FORCE_BENDING,
@@ -521,8 +541,8 @@ int main(int argc, char* argv[]) {
   const unsigned int tcheckpoint =
       (*cfg)["sim"]["tcheckpoint"].read<unsigned int>();
 
-  pcout << "(Bifurcation) Starting pure-RBC stage-B solid-wall-repulsion "
-           "baseline."
+  pcout << "(Bifurcation) Starting pure-RBC stage-C adhesion and solid-wall-"
+           "repulsion baseline."
         << endl;
   while (hemocell.iter < tmax) {
     // Install the force before the pre-inlet collide-and-stream performed by

@@ -27,6 +27,14 @@
     <initialMinimumDistanceFromSolid>0.5</initialMinimumDistanceFromSolid> <!-- um -->
 </ibm>
 
+<cellCellAdhesion>
+    <r0>0.2</r0>                       <!-- LJ/Morse transition distance [um] -->
+    <rc>1.0</rc>                       <!-- Adhesion cutoff distance [um] -->
+    <epsilon>4.100531391e-22</epsilon> <!-- LJ energy scale [J] -->
+    <D0>4.100531391e-21</D0>           <!-- Morse well depth [J] -->
+    <alpha>3.0</alpha>                 <!-- Morse width parameter [um^-1] -->
+</cellCellAdhesion>
+
 <boundaryRepulsion>
     <constant>2e-22</constant>
     <cutoff>0.7</cutoff> <!-- um; original HemoCell boundary-repulsion cutoff -->
