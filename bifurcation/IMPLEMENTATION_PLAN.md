@@ -543,13 +543,13 @@ boundaryRepulsionCutoffLbm = cutoff_um * 1e-6 / dx
 
 ## 11. 构建与运行接入
 
-`bifurcation` 位于仓库根目录且目前没有构建文件。实施时采用与根目录其他独立算例相同的两阶段方式：
+`bifurcation` 位于仓库根目录，构建和运行脚本采用与 `twoCellShear` 相同的简洁形式：
 
-1. 在 `src_hemocell/build` 增量构建 `libhemocell.a`；
-2. 在 `bifurcation/build` 独立编译和链接 `bifurcation.cpp`；
+1. `src_hemocell/build/libhemocell.a` 由 HemoCell 自身构建流程预先生成；
+2. `compile.sh` 只在 `bifurcation/build` 配置并构建当前算例；
 3. 最终可执行文件输出为 `bifurcation/bifurcation`；
-4. `compile.sh` 根据自身目录计算绝对路径，不依赖调用时工作目录；
-5. `run.sh` 从 `bifurcation` 目录启动，确保相对路径能找到 STL、XML 和 `RBC.pos`；
+4. `compile.sh` 和 `run.sh` 均从 `bifurcation` 目录调用，与 `twoCellShear` 的脚本使用方式一致；
+5. `run.sh` 固定以 16 个 MPI rank 启动 `config.xml`；
 6. 构建脚本不运行 `packCells`；
 7. 构建目录、可执行文件、输出、checkpoint 和日志加入 `.gitignore`。
 8. 固定使用 16 个 MPI rank：pre-inlet 按 `1×2×2` 使用 4 rank，主域按 `3×2×2` 使用 12 rank；程序启动时校验配置分块数之和与实际 MPI rank 数一致。
