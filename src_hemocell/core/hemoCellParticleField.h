@@ -25,6 +25,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define HEMOCELLPARTICLEFIELD_H
 
 namespace hemo {
+  enum class BoundaryParticleSelection {
+    AllBoundaryDynamics,
+    SolidBounceBackOnly
+  };
+
   class HemoCellParticleField;
 }
 
@@ -77,6 +82,7 @@ public:
     int deleteIncompleteCells(bool verbose=true);
     void syncEnvelopes();
     void populateBoundaryParticles();
+    void populateBoundaryParticles(BoundaryParticleSelection selection);
     void applyBoundaryRepulsionForce();
     void applyBoundaryAdhesionForce();
     void populateBindingSites(plb::Box3D & domain);

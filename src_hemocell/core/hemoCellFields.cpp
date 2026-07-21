@@ -623,12 +623,15 @@ void HemoCellFields::applyBoundaryAdhesionForce() {
 }
 
 void HemoCellFields::HemoPopulateBoundaryParticles::processGenericBlocks(Box3D domain, std::vector<AtomicBlock3D*> blocks) {
-    dynamic_cast<HemoCellParticleField*>(blocks[0])->populateBoundaryParticles();
+    dynamic_cast<HemoCellParticleField*>(blocks[0])->populateBoundaryParticles(selection);
 }
 void HemoCellFields::populateBoundaryParticles() {
+    populateBoundaryParticles(BoundaryParticleSelection::AllBoundaryDynamics);
+}
+void HemoCellFields::populateBoundaryParticles(BoundaryParticleSelection selection) {
     vector<MultiBlock3D*>wrapper;
     wrapper.push_back(immersedParticles);
-    HemoPopulateBoundaryParticles * fnct = new HemoPopulateBoundaryParticles();
+    HemoPopulateBoundaryParticles * fnct = new HemoPopulateBoundaryParticles(selection);
     applyProcessingFunctional(fnct,immersedParticles->getBoundingBox(),wrapper);
 }
 

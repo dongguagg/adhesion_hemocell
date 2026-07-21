@@ -105,7 +105,7 @@ def createH5AttibuteCell(xmlInt=XMLIndentation()):
             attributeName, AttributeType
             subDomainNx, subDomainNy, subDomainNz
     """
-    h5Attribute  = xmlInt.inc() + '<Attribute Name="%(attributeName)s" AttributeType="%(AttributeType)s">\n'
+    h5Attribute  = xmlInt.inc() + '<Attribute Name="%(attributeName)s" AttributeType="%(AttributeType)s" Center="Node">\n'
     h5Attribute += xmlInt.inc() + '<DataItem Dimensions="%(numberOfParticles)d %(rankString)s" Format="HDF">\n'
     h5Attribute += xmlInt.cur() + '%(pathToHDF5)s:/%(attributeName)s\n'
     h5Attribute += xmlInt.dec() + '</DataItem>\n'
@@ -139,10 +139,17 @@ def updateDictForXDMFStringsCell(h5File, h5dict):
         dimObjShape = len(obj_shape)
         if dimObjShape==1:
           attributeType, rankString = "Scalar", ""
+        elif dimObjShape==2 and obj_shape[-1] == 1:
+          attributeType, rankString = "Scalar", "1"
         elif dimObjShape==2 and obj_shape[-1] == 3:
           attributeType, rankString = "Vector", "3"
+        elif dimObjShape==2 and obj_shape[-1] == 6:
+          attributeType, rankString = "Tensor6", "6"
+        elif dimObjShape==2 and obj_shape[-1] == 9:
+          attributeType, rankString = "Tensor", "9"
         else:
-          attributeType, rankString = "Matrix", " ".join(obj_shape[3:])
+          attributeType = "Matrix"
+          rankString = " ".join(map(str, obj_shape[1:]))
         return attributeType, rankString 
   
     def dictFromObject(obj):

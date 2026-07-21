@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<hemocell>
+
+<preInlet>
+  <parameters>
+    <lengthN>60</lengthN> <!-- Length in lattice units -->
+    <Re>0.1</Re>
+  </parameters>
+</preInlet>
+
+<flow>
+    <outletDensity>1.0</outletDensity> <!-- LBM reference density for both daughter outlets -->
+</flow>
+
+<parameters>
+    <warmup>10</warmup> <!-- Cell-free iterations used to establish pre-inlet flow -->
+    <outputDirectory>output</outputDirectory>
+    <checkpointDirectory>checkpoint</checkpointDirectory>
+    <logDirectory>log</logDirectory>
+    <logFile>bifurcation.log</logFile>
+</parameters>
+
+<ibm>
+    <stepMaterialEvery>1</stepMaterialEvery>
+    <stepParticleEvery>1</stepParticleEvery>
+    <stepInteractionEvery>1</stepInteractionEvery>
+    <initialMinimumDistanceFromSolid>0.5</initialMinimumDistanceFromSolid> <!-- um -->
+</ibm>
+
+<boundaryRepulsion>
+    <constant>2e-22</constant>
+    <cutoff>0.7</cutoff> <!-- um; original HemoCell boundary-repulsion cutoff -->
+</boundaryRepulsion>
+
+<domain>
+    <geometry>bifurcation3D.stl</geometry>
+    <fluidEnvelope>2</fluidEnvelope>
+    <rhoP>1025</rhoP>   <!-- Plasma density [kg/m^3] -->
+    <nuP>1.1e-6</nuP>   <!-- Plasma kinematic viscosity [m^2/s] -->
+    <dx>5e-7</dx>
+    <dt>1e-7</dt>
+    <refDir>2</refDir>
+    <refDirN>40</refDirN>
+    <blockSize>-1</blockSize>
+    <kBT>4.100531391e-21</kBT>
+    <particleEnvelope>35</particleEnvelope>
+</domain>
+
+<sim>
+    <tmax>500000</tmax>
+    <tmeas>5000</tmeas>
+    <tcheckpoint>100000</tcheckpoint>
+</sim>
+
+</hemocell>

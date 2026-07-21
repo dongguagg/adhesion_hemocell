@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "mollerTrumbore.h"
 #include "bindingField.h"
 #include "interiorViscosity.h"
+#include "core/dynamics.hh"
 #include <cmath>
 #pragma GCC diagnostic push 
 #pragma GCC diagnostic ignored "-Wint-in-bool-context"
@@ -35,6 +36,22 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic pop
 
 namespace hemo { 
+
+namespace {
+
+bool isSelectedBoundaryDynamics(
+    plb::Dynamics<T, DESCRIPTOR> const& dynamics,
+    BoundaryParticleSelection selection) {
+  if (selection == BoundaryParticleSelection::AllBoundaryDynamics) {
+    return dynamics.isBoundary();
+  }
+
+  static const int bounceBackId = plb::BounceBack<T, DESCRIPTOR>().getId();
+  return dynamics.getId() == bounceBackId;
+}
+
+}  // namespace
+
 /* *************** class HemoParticleField3D ********************** */
 
 HemoCellParticleField::HemoCellParticleField(plint nx, plint ny, plint nz)
@@ -891,19 +908,27 @@ void HemoCellParticleField::spreadParticleForce(Box3D domain) {
 }
 
 void HemoCellParticleField::populateBoundaryParticles() {
+  populateBoundaryParticles(BoundaryParticleSelection::AllBoundaryDynamics);
+}
+
+void HemoCellParticleField::populateBoundaryParticles(
+    BoundaryParticleSelection selection) {
   boundaryParticles.clear();
 
   for (int x = 0; x < this->atomicLattice->getNx()-1; x++) {
     for (int y = 0; y < this->atomicLattice->getNy()-1; y++) {
       for (int z = 0; z < this->atomicLattice->getNz()-1; z++) {
-        if (this->atomicLattice->get(x,y,z).getDynamics().isBoundary()) {
+        if (isSelectedBoundaryDynamics(
+                this->atomicLattice->get(x,y,z).getDynamics(), selection)) {
           for (int xx = x-1; xx <= x+1; xx++) {
             if (xx < 0 || xx > this->atomicLattice->getNx()-1) {continue;}
             for (int yy = y-1; yy <= y+1; yy++) {
               if (yy < 0 || yy > this->atomicLattice->getNy()-1) {continue;}
               for (int zz = z-1; zz <= z+1; zz++) {
                 if (zz < 0 || zz > this->atomicLattice->getNz()-1) {continue;}
-                if (!this->atomicLattice->get(xx,yy,zz).getDynamics().isBoundary()) {
+                if (!isSelectedBoundaryDynamics(
+                        this->atomicLattice->get(xx,yy,zz).getDynamics(),
+                        selection)) {
                   boundaryParticles.push_back({x,y,z});       
                   goto end_inner_loop;
                 }

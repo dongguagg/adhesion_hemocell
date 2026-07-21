@@ -199,6 +199,11 @@ void HemoCell::loadParticles() {
 void HemoCell::loadCheckPoint() {
   hlog << "(HemoCell) (Saving Functions) Loading Checkpoint"  << endl;
   cellfields->load(documentXML, iter, cfg);
+  if (boundaryRepulsionEnabled) {
+    cellfields->populateBoundaryParticles(boundaryParticleSelection);
+  } else if (boundaryAdhesionEnabled) {
+    cellfields->populateBoundaryParticles();
+  }
   if (global.enableSolidifyMechanics) {
     bindingFieldHelper::restore(*cellfields);
   }
@@ -513,14 +518,29 @@ void HemoCell::setBoundaryAdhesion(T r0, T rc, T epsilon, T D0, T alpha) {
   hlogfile << "(HemoCell) (Boundary Adhesion) Enabling boundary adhesion."
            << endl;
 
+  boundaryParticleSelection = BoundaryParticleSelection::AllBoundaryDynamics;
   cellfields->populateBoundaryParticles();
   boundaryRepulsionEnabled = false;
   boundaryAdhesionEnabled = true;
 }
 
 void HemoCell::enableBoundaryParticles(T boundaryRepulsionConstant, T boundaryRepulsionCutoff, unsigned int timestep) {
-  cellfields->populateBoundaryParticles();
+  enableBoundaryParticles(
+      boundaryRepulsionConstant, boundaryRepulsionCutoff, timestep,
+      BoundaryParticleSelection::AllBoundaryDynamics);
+}
+
+void HemoCell::enableBoundaryParticles(
+    T boundaryRepulsionConstant, T boundaryRepulsionCutoff,
+    unsigned int timestep, BoundaryParticleSelection selection) {
+  boundaryParticleSelection = selection;
+  cellfields->populateBoundaryParticles(selection);
   hlog << "(HemoCell) (Repulsion) Setting boundary repulsion constant to " << boundaryRepulsionConstant << ". boundary repulsionCutoff to" << boundaryRepulsionCutoff << " µm" << endl;
+  hlog << "(HemoCell) (Repulsion) Boundary-particle selection: "
+       << (selection == BoundaryParticleSelection::SolidBounceBackOnly
+               ? "SolidBounceBackOnly"
+               : "AllBoundaryDynamics")
+       << endl;
   hlogfile << "(HemoCell) (Repulsion) Enabling boundary repulsion" << endl;
   cellfields->boundaryRepulsionConstant = boundaryRepulsionConstant;
   cellfields->boundaryRepulsionCutoff = boundaryRepulsionCutoff*(1e-6/param::dx);
@@ -674,6 +694,11 @@ void HemoCell::doLoadBalance() {
 void HemoCell::doRestructure(bool checkpoint_avail) {
   hlog << "(HemoCell) (LoadBalancer) Restructuring Atomic Blocks on processors" << endl;
   loadBalancer->restructureBlocks(checkpoint_avail);
+  if (boundaryRepulsionEnabled) {
+    cellfields->populateBoundaryParticles(boundaryParticleSelection);
+  } else if (boundaryAdhesionEnabled) {
+    cellfields->populateBoundaryParticles();
+  }
 }
 
 void HemoCell::sanityCheck() {

@@ -152,6 +152,7 @@ public:
 
   /// Add boundary particles on the fluid-solid boundary
   void populateBoundaryParticles();
+  void populateBoundaryParticles(BoundaryParticleSelection selection);
 
   /// Add bindingSites
   void populateBindingSites(plb::Box3D * box = 0);
@@ -339,8 +340,12 @@ public:
     HemoSetParticles(vector<HemoCellParticle> & particles_) : particles(particles_) {}
   };
   class HemoPopulateBoundaryParticles: public HemoCellFunctional {
+   BoundaryParticleSelection selection;
    void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);
    HemoPopulateBoundaryParticles * clone() const;
+  public:
+   explicit HemoPopulateBoundaryParticles(BoundaryParticleSelection selection_)
+       : selection(selection_) {}
   };
   class HemoPopulateBindingSites: public HemoCellFunctional {
    void processGenericBlocks(plb::Box3D, std::vector<plb::AtomicBlock3D*>);

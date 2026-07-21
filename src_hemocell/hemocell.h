@@ -182,6 +182,10 @@ class HemoCell {
   
   //Enable Boundary particles and set the boundary particle constants
   void enableBoundaryParticles(T boundaryRepulsionConstant, T boundaryRepulsionCutoff, unsigned int timestep = 1);
+  void enableBoundaryParticles(T boundaryRepulsionConstant,
+                               T boundaryRepulsionCutoff,
+                               unsigned int timestep,
+                               BoundaryParticleSelection selection);
   
   //Set the minimum distance of the particles of a type to the solid, must be called BEFORE loadparticles
   void setInitialMinimumDistanceFromSolid(string name, T distance);
@@ -264,6 +268,8 @@ public:
   void sanityCheck();
   /// Checked in iteration, do sanity check when not yet done
   bool sanityCheckDone = false;
+  BoundaryParticleSelection boundaryParticleSelection =
+      BoundaryParticleSelection::AllBoundaryDynamics;
 };
 }
 #endif // HEMOCELL_H
