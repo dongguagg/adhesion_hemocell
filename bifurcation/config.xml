@@ -5,6 +5,10 @@
   <parameters>
     <lengthN>60</lengthN> <!-- Length in lattice units -->
     <Re>0.1</Re>
+    <!-- Four MPI ranks: split the circular cross-section into y-z quadrants. -->
+    <pABx>1</pABx>
+    <pABy>2</pABy>
+    <pABz>2</pABz>
   </parameters>
 </preInlet>
 
@@ -50,6 +54,10 @@
     <refDir>2</refDir>
     <refDirN>40</refDirN>
     <blockSize>-1</blockSize>
+    <!-- Twelve MPI ranks: three streamwise sections and four y-z quadrants. -->
+    <mABx>3</mABx>
+    <mABy>2</mABy>
+    <mABz>2</mABz>
     <kBT>4.100531391e-21</kBT>
     <particleEnvelope>35</particleEnvelope>
 </domain>

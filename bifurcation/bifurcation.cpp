@@ -369,6 +369,42 @@ int main(int argc, char* argv[]) {
   HemoCell hemocell(argv[1], argc, argv);
   Config* cfg = hemocell.cfg;
 
+  const std::array<int, 3> preInletBlocks = {{
+      (*cfg)["preInlet"]["parameters"]["pABx"].read<int>(),
+      (*cfg)["preInlet"]["parameters"]["pABy"].read<int>(),
+      (*cfg)["preInlet"]["parameters"]["pABz"].read<int>()}};
+  const std::array<int, 3> mainBlocks = {{
+      (*cfg)["domain"]["mABx"].read<int>(),
+      (*cfg)["domain"]["mABy"].read<int>(),
+      (*cfg)["domain"]["mABz"].read<int>()}};
+  if (std::any_of(preInletBlocks.begin(), preInletBlocks.end(),
+                  [](int blocks) { return blocks <= 0; }) ||
+      std::any_of(mainBlocks.begin(), mainBlocks.end(),
+                  [](int blocks) { return blocks <= 0; })) {
+    pcout << "(Bifurcation) All pAB and mAB decomposition counts must be "
+             "positive."
+          << endl;
+    return EXIT_FAILURE;
+  }
+
+  const int preInletRanks =
+      preInletBlocks[0] * preInletBlocks[1] * preInletBlocks[2];
+  const int mainRanks = mainBlocks[0] * mainBlocks[1] * mainBlocks[2];
+  const int requiredRanks = preInletRanks + mainRanks;
+  if (global::mpi().getSize() != requiredRanks) {
+    pcout << "(Bifurcation) Configured MPI decomposition requires "
+          << requiredRanks << " ranks (preInlet " << preInletRanks
+          << " + main domain " << mainRanks << "), but the run has "
+          << global::mpi().getSize() << "." << endl;
+    return EXIT_FAILURE;
+  }
+  pcout << "(Bifurcation) MPI decomposition: preInlet="
+        << preInletBlocks[0] << "x" << preInletBlocks[1] << "x"
+        << preInletBlocks[2] << " (" << preInletRanks
+        << " ranks), main domain=" << mainBlocks[0] << "x"
+        << mainBlocks[1] << "x" << mainBlocks[2] << " (" << mainRanks
+        << " ranks)." << endl;
+
   hlog << "(Bifurcation) Reading and voxelizing STL file "
        << (*cfg)["domain"]["geometry"].read<string>() << endl;
   MultiScalarField3D<int>* flagMatrix = nullptr;

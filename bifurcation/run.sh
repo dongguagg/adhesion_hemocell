@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-NP="${NP:-2}"
+NP="${NP:-16}"
 CONFIG="${1:-config.xml}"
 
 if (( NP < 2 )); then

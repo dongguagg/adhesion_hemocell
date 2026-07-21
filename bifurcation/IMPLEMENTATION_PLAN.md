@@ -552,6 +552,7 @@ boundaryRepulsionCutoffLbm = cutoff_um * 1e-6 / dx
 5. `run.sh` 从 `bifurcation` 目录启动，确保相对路径能找到 STL、XML 和 `RBC.pos`；
 6. 构建脚本不运行 `packCells`；
 7. 构建目录、可执行文件、输出、checkpoint 和日志加入 `.gitignore`。
+8. 固定使用 16 个 MPI rank：pre-inlet 按 `1×2×2` 使用 4 rank，主域按 `3×2×2` 使用 12 rank；程序启动时校验配置分块数之和与实际 MPI rank 数一致。
 
 新增算例文件计划：
 
@@ -688,5 +689,5 @@ boundaryRepulsionCutoffLbm = cutoff_um * 1e-6 / dx
 ## 15. 实施前需要用户确认的项目
 
 1. `<cellCellAdhesion>` 的 `r0`、`rc`、`epsilon`、`D0`、`alpha` 最终数值；
-2. 目标 MPI 进程数，以便确定主域和 pre-inlet 的分块配置及回归规模；
+2. [已确认] 使用 16 个 MPI 进程，pre-inlet 为 `1×2×2`，主域为 `3×2×2`；
 3. 是否需要在主程序中实时输出聚集体 cluster size，还是保留为基于 `cellId` 和距离的后处理任务。
