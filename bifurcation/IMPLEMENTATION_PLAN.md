@@ -560,8 +560,9 @@ boundaryRepulsionCutoffLbm = cutoff_um * 1e-6 / dx
 | --- | --- |
 | `bifurcation/RBC.xml` | 原样复制 `src_hemocell/examples/pipeflow_with_preinlet/RBC.xml` |
 | `bifurcation/CMakeLists.txt` | 独立链接 HemoCell 静态库 |
-| `bifurcation/compile.sh` | 两阶段增量构建 |
-| `bifurcation/run.sh` | 明确 MPI 进程数和配置路径 |
+| `bifurcation/compile.sh` | 独立配置并构建当前算例 |
+| `bifurcation/run.sh` | 固定以 16 个 MPI rank 运行 `config.xml` |
+| `bifurcation/postProcess.sh` | 在 `output` 中调用 HemoCell 批量后处理脚本生成 XMF |
 
 ## 12. 分阶段实施顺序
 
