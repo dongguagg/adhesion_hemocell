@@ -40,8 +40,8 @@
 </cellCellAdhesion>
 
 <boundaryRepulsion>
-    <constant>2e-22</constant>
-    <cutoff>0.7</cutoff> <!-- um; original HemoCell boundary-repulsion cutoff -->
+    <kRep>1.0e-4</kRep>
+    <RepCutoff>0.7</RepCutoff> <!-- um; original HemoCell boundary-repulsion cutoff -->
 </boundaryRepulsion>
 
 <domain>

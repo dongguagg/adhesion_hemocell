@@ -155,7 +155,7 @@ void printBoundaryParticleDiagnostics(
 }
 
 bool configureSolidBoundaryRepulsion(
-    HemoCell& hemocell, T constant, T cutoff, unsigned int timestep,
+    HemoCell& hemocell, T kRep, T RepCutoff, unsigned int timestep,
     std::vector<Dot3D> const& inletPoints,
     std::vector<OutletSection> const& outlets) {
   std::set<GridPointKey> const inlet = gridPointSet(inletPoints);
@@ -169,7 +169,7 @@ bool configureSolidBoundaryRepulsion(
       collectBoundaryParticleDiagnostics(hemocell, inlet, outlet1, outlet2);
 
   hemocell.enableBoundaryParticles(
-      constant, cutoff, timestep,
+      kRep, RepCutoff, timestep,
       BoundaryParticleSelection::SolidBounceBackOnly);
   BoundaryParticleDiagnostics const solidOnly =
       collectBoundaryParticleDiagnostics(hemocell, inlet, outlet1, outlet2);
@@ -519,10 +519,9 @@ int main(int argc, char* argv[]) {
   const T cellCellD0 = (*cfg)["cellCellAdhesion"]["D0"].read<T>();
   const T cellCellAlpha =
       (*cfg)["cellCellAdhesion"]["alpha"].read<T>();
-  const T boundaryRepulsionConstant =
-      (*cfg)["boundaryRepulsion"]["constant"].read<T>();
-  const T boundaryRepulsionCutoff =
-      (*cfg)["boundaryRepulsion"]["cutoff"].read<T>();
+  const T kRep = (*cfg)["boundaryRepulsion"]["kRep"].read<T>();
+  const T RepCutoff =
+      (*cfg)["boundaryRepulsion"]["RepCutoff"].read<T>();
 
   hemocell.setAdhesion(cellCellR0, cellCellRc, cellCellEpsilon, cellCellD0,
                        cellCellAlpha);
@@ -565,7 +564,7 @@ int main(int argc, char* argv[]) {
     }
 
     if (!configureSolidBoundaryRepulsion(
-            hemocell, boundaryRepulsionConstant, boundaryRepulsionCutoff,
+            hemocell, kRep, RepCutoff,
             interactionEvery, inletPoints, outlets)) {
       delete outletBoundary;
       return EXIT_FAILURE;
@@ -578,7 +577,7 @@ int main(int argc, char* argv[]) {
           << endl;
     hemocell.loadCheckPoint();
     if (!configureSolidBoundaryRepulsion(
-            hemocell, boundaryRepulsionConstant, boundaryRepulsionCutoff,
+            hemocell, kRep, RepCutoff,
             interactionEvery, inletPoints, outlets)) {
       delete outletBoundary;
       return EXIT_FAILURE;
