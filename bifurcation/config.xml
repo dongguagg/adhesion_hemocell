@@ -40,7 +40,7 @@
 </cellCellAdhesion>
 
 <boundaryRepulsion>
-    <kRep>1.0e-4</kRep>
+    <kRep>1.0e-3</kRep>
     <RepCutoff>0.7</RepCutoff> <!-- um; original HemoCell boundary-repulsion cutoff -->
 </boundaryRepulsion>
 
@@ -59,7 +59,7 @@
     <mABy>2</mABy>
     <mABz>2</mABz>
     <kBT>4.100531391e-21</kBT>
-    <particleEnvelope>35</particleEnvelope>
+    <particleEnvelope>25</particleEnvelope>
 </domain>
 
 <sim>
