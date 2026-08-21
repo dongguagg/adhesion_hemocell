@@ -50,6 +50,9 @@ __pycache__/
 *.swo
 *~
 
+# Local agent instructions
+AGENTS.md
+
 # Executables produced in source directories by the local cases
 /twoCellShear/twoCellShear
 /twoCellShear/out.txt
