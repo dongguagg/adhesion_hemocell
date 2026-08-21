@@ -53,6 +53,7 @@ __pycache__/
 # Local agent instructions and planning documents
 AGENTS.md
 /bifurcation/IMPLEMENTATION_PLAN.md
+/bifurcation/bifurcation3D.stl
 /twoCellPull/DESIGN.md
 
 # Executables produced in source directories by the local cases
