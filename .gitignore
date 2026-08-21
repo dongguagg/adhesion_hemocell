@@ -54,6 +54,7 @@ __pycache__/
 AGENTS.md
 /bifurcation/IMPLEMENTATION_PLAN.md
 /bifurcation/bifurcation3D.stl
+/bifurcation/generate_rbcs.sh
 /twoCellPull/DESIGN.md
 
 # Executables produced in source directories by the local cases
