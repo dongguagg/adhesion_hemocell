@@ -50,8 +50,10 @@ __pycache__/
 *.swo
 *~
 
-# Local agent instructions
+# Local agent instructions and planning documents
 AGENTS.md
+/bifurcation/IMPLEMENTATION_PLAN.md
+/twoCellPull/DESIGN.md
 
 # Executables produced in source directories by the local cases
 /twoCellShear/twoCellShear
