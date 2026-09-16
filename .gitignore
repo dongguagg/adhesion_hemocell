@@ -64,3 +64,8 @@ AGENTS.md
 /twoCellPull/out.txt
 /bifurcation/bifurcation
 /bifurcation/out.txt
+
+# Pipeflow local inputs and runtime artifacts (build/output/log use rules above)
+/pipeflow/initial_states/
+/pipeflow/pipeflow
+/pipeflow/out.txt
