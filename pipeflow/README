@@ -45,6 +45,43 @@ The simulation explicitly uses a 2x1x1 block decomposition along x, with one
 block per MPI rank. Exactly two ranks are required. The voxelized fluid/solid
 mask is copied onto the same decomposition before initializing the lattice.
 
+Generate a new RBC input from the pipeflow directory:
+
+    ./generate_rbcs.sh
+
+The command uses a 49 x 28 x 28 um box, --hematocrit 0.40, and --plt_ratio 0.
+It writes RBC.pos directly in this directory. These integer box sizes match
+packCells' default 7 um bin rounding. The 49 um axial packing period is shorter
+than the simulation's 51.5 um period; using 56 um instead can bring originally
+separated end cells closer when loaded into the shorter periodic tube.
+
+The rectangular packing fraction is not the resulting tube hematocrit.
+packCells assumes 97 um^3 per RBC; the actual mesh volume is about 81.1 um^3.
+Cells outside or too close to the circular wall are discarded during loading.
+The current replacement input contains 158 candidates and retains 38 RBCs,
+with an initial tube hematocrit of 12.31%. The priority of this baseline is
+stable initialization; it does not meet the earlier 25% target.
+
+The replacement input passed a two-rank, 1000-step run with all 38 RBCs retained
+and all CSV/HDF5 numeric data finite. Its minimum initial cross-cell node
+distance is 0.328 um (including the axial periodic images), above r0=0.2 um;
+its peak initial interaction force is 20.5 pN. Validation data and the previous
+overlapping RBC.pos are in initial_states/validated_low_hct (ignored by Git).
+This is a short-run check, not a guarantee of long-run stability. Re-running
+generate_rbcs.sh creates a new random realization which must be checked again.
+
+The failed 0.70 input had 74 retained RBCs (23.97% tube hematocrit), a minimum
+initial node distance of only 0.0113 um, and a peak interaction force of about
+399 N. packCells reduces its collision-ellipsoid scale during packing, so
+PACKING DONE does not guarantee separation of full-size membrane meshes at
+high requested density. The existing force limit applies to membrane forces,
+not the separate interaction-force slot. No model or time-step parameters
+were changed in this correction.
+
+Existing output/ data still describe the failed run. Start with ./run.sh to
+use the replacement RBC.pos in a fresh run; HemoCell creates a new output_N
+folder. Do not resume the failed checkpoint for this initialization change.
+
 Cell-cell interactions use HemoCell::setAdhesion (short-range LJ repulsion,
 Morse attraction, hard cutoff). The five physical parameters are copied from
 bifurcation/config.xml:
